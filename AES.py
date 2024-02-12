@@ -84,11 +84,13 @@ async def decrypt(key: str, file: UploadFile = File(...)):
 
     # Save the decrypted file with a new filename
     decrypted_filename = file.filename[:-4] + "_decrypted"
+    full_path = os.path.abspath(decrypted_filename)
     with open(decrypted_filename, 'wb') as decrypted_file:
         decrypted_file.write(decrypted_data)
 
     # Return the decrypted filename
-    return FileResponse(decrypted_filename)
+    #return FileResponse(decrypted_filename)
+    return {"decrypted_filename": decrypted_filename, "full_path": full_path}
 
 @app.post("/upload")
 async def pinata_upload(file: UploadFile = File(...)):
