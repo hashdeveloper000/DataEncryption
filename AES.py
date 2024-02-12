@@ -1,5 +1,6 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse
+from starlette.requests import Request
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 import requests
@@ -105,3 +106,16 @@ async def get_pinata_data():
 
     # Retrieve pin list from Pinata and return the response
     return get_pin_list(PINATA_JWT_TOKEN)
+
+
+@app.get("/download/{filename}")
+async def download_file(filename: str):
+    file_path = os.path.join("/opt/render/project/src", filename)
+
+    # Check if the file exists
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+
+    # Return the file as a response
+    return FileResponse(file_path, media_type='application/octet-stream',
+                        headers={'Content-Disposition': f'attachment; filename={filename}'})
