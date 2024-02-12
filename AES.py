@@ -58,11 +58,12 @@ async def encrypt(file: UploadFile = File(...)):
 
     # Save the encrypted file with a new filename
     encrypted_filename = file.filename + ".enc"
+    full_path = os.path.abspath(encrypted_filename)
     with open(encrypted_filename, 'wb') as encrypted_file:
         [encrypted_file.write(x) for x in (nonce, tag, ciphertext)]
 
-    # Return the key and encrypted filename
-    return {"key": key_aes.hex(), "encrypted_filename": encrypted_filename}
+    # Return the key, encrypted filename, and full path
+    return {"key": key_aes.hex(), "encrypted_filename": encrypted_filename, "full_path": full_path}
 
 @app.post("/decrypt")
 async def decrypt(key: str, file: UploadFile = File(...)):
