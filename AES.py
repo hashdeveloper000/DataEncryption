@@ -60,7 +60,7 @@ async def encrypt(file: UploadFile = File(...)):
     nonce, tag, ciphertext = encrypt_aes(plaintext, key_aes)
 
     # Save the encrypted file with a new filename
-    encrypted_filename = file.filename + ".enc"
+    encrypted_filename =  "encrypted_" + file.filename
     full_path = os.path.abspath(encrypted_filename)
     with open(encrypted_filename, 'wb') as encrypted_file:
         [encrypted_file.write(x) for x in (nonce, tag, ciphertext)]
@@ -85,7 +85,7 @@ async def decrypt(key: str, file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail=str(e))
 
     # Save the decrypted file with a new filename
-    decrypted_filename = file.filename[:-4] + "_decrypted"
+    decrypted_filename = "decrypted_" + file.filename
     full_path = os.path.abspath(decrypted_filename)
     with open(decrypted_filename, 'wb') as decrypted_file:
         decrypted_file.write(decrypted_data)
