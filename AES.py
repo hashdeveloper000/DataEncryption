@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException,Form
 from fastapi.responses import FileResponse ,JSONResponse
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
@@ -93,14 +93,30 @@ async def decrypt(key: str, file: UploadFile = File(...)):
     # Return the decrypted filename and the path
     return {"decrypted_filename": decrypted_filename, "full_path": full_path}
 
-@app.post("/upload")
-async def pinata_upload(file: UploadFile = File(...)):
+#@app.post("/upload")
+#async def pinata_upload(file: UploadFile = File(...), filename: str = Form(...)):
     # Get Pinata JWT token from environment variables
-    PINATA_JWT_TOKEN = os.getenv('PINATA_JWT_TOKEN')
-    FILE_PATH = file.filename
+#    PINATA_JWT_TOKEN = os.getenv('PINATA_JWT_TOKEN')
+    #FILE_PATH = file.filename
 
     # Upload the file to Pinata and return the response
-    return pin_to_IPFS(FILE_PATH, PINATA_JWT_TOKEN)
+    #return pin_to_IPFS(FILE_PATH, PINATA_JWT_TOKEN)
+#    return pin_to_IPFS(filename, PINATA_JWT_TOKEN)
+
+@app.post("/upload")
+async def pinata_upload(filename: str = Form(...)):
+    # Get Pinata JWT token from environment variables
+    PINATA_JWT_TOKEN = os.getenv('PINATA_JWT_TOKEN')
+
+    # Construct the full file path using the current directory and the provided filename
+    filepath = os.path.join(os.getcwd(), filename)
+
+    # Check if the file exists
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail="File not found")
+
+    # Upload the file to Pinata and return the response
+    return pin_to_IPFS(filepath, PINATA_JWT_TOKEN)
 
 @app.get("/getInfo")
 async def get_pinata_data():

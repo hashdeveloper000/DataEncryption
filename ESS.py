@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.responses import JSONResponse, FileResponse
 from ecies.utils import generate_eth_key
 from ecies import encrypt, decrypt
@@ -95,12 +95,27 @@ async def decrypt_endpoint(private_key: str, file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail="Decryption failed")
 
-@app.post("/upload")
-async def pinata_upload(file: UploadFile = File(...)):
+#@app.post("/upload")
+#async def pinata_upload(file: UploadFile = File(...)):
     """Uploads a file to Pinata and pins it to IPFS."""
-    PINATA_JWT_TOKEN = os.getenv('JWT')
-    FILE_PATH = file.filename
-    return pin_to_IPFS(FILE_PATH, PINATA_JWT_TOKEN)
+#    PINATA_JWT_TOKEN = os.getenv('JWT')
+#    FILE_PATH = file.filename
+#    return pin_to_IPFS(FILE_PATH, PINATA_JWT_TOKEN)
+
+@app.post("/upload")
+async def pinata_upload(filename: str = Form(...)):
+    # Get Pinata JWT token from environment variables
+    PINATA_JWT_TOKEN = os.getenv('PINATA_JWT_TOKEN')
+
+    # Construct the full file path using the current directory and the provided filename
+    filepath = os.path.join(os.getcwd(), filename)
+
+    # Check if the file exists
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail="File not found")
+
+    # Upload the file to Pinata and return the response
+    return pin_to_IPFS(filepath, PINATA_JWT_TOKEN)
 
 @app.get("/getInfo")
 async def get_pinata_data():
