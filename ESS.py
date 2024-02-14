@@ -45,10 +45,15 @@ def decrypt_file(private_key_hex, file_content, output_file_path):
     except Exception as e:
         raise HTTPException(status_code=500, detail="Decryption failed")
 
-def pin_to_IPFS(filepath, jwt_token):
-    """Pins a file to IPFS using Pinata API."""
+def pin_to_IPFS(filename, jwt_token):
+    # Define Pinata API endpoint for pinning files to IPFS
     url = "https://api.pinata.cloud/pinning/pinFileToIPFS"
     headers = {'Authorization': f'Bearer {jwt_token}'}
+
+    # Construct the full file path using the current directory and the provided filename
+    filepath = os.path.join(os.getcwd(), filename)
+
+    # Send a POST request to Pinata API to pin the file to IPFS
     with open(filepath, 'rb') as file:
         response = requests.post(url, files={'file': file}, headers=headers)
         return response.json()

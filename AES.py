@@ -1,6 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import FileResponse
-from starlette.requests import Request
+from fastapi.responses import FileResponse ,JSONResponse
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 import requests
@@ -26,10 +25,13 @@ def decrypt_aes(nonce, tag, ciphertext, key):
     decrypted_data = cipher.decrypt_and_verify(ciphertext, tag)
     return decrypted_data
 
-def pin_to_IPFS(filepath, jwt_token):
+def pin_to_IPFS(filename, jwt_token):
     # Define Pinata API endpoint for pinning files to IPFS
     url = "https://api.pinata.cloud/pinning/pinFileToIPFS"
     headers = {'Authorization': f'Bearer {jwt_token}'}
+
+    # Construct the full file path using the current directory and the provided filename
+    filepath = os.path.join(os.getcwd(), filename)
 
     # Send a POST request to Pinata API to pin the file to IPFS
     with open(filepath, 'rb') as file:
@@ -88,8 +90,7 @@ async def decrypt(key: str, file: UploadFile = File(...)):
     with open(decrypted_filename, 'wb') as decrypted_file:
         decrypted_file.write(decrypted_data)
 
-    # Return the decrypted filename
-    #return FileResponse(decrypted_filename)
+    # Return the decrypted filename and the path
     return {"decrypted_filename": decrypted_filename, "full_path": full_path}
 
 @app.post("/upload")
