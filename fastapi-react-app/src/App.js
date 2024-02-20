@@ -13,7 +13,7 @@ const FileEncryptionApp = () => {
 
   useEffect(() => {
     // Fetch Pinata information on component mount
-    getPinataInfo();
+    //getPinataInfo();
   }, []); // Empty dependency array means it runs only once
 
   const generateKeys = async () => {
