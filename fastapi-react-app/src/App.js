@@ -18,7 +18,7 @@ const FileEncryptionApp = () => {
 
   const generateKeys = async () => {
     try {
-      const response = await axios.get('https://standardencyptionprotocolstest.onrender.com/generate_keys');
+      const response = await axios.get('https://ess-encryption.onrender.com/generate_keys');
       setKeys(response.data);
     } catch (error) {
       console.error('Error generating keys:', error);
@@ -27,7 +27,7 @@ const FileEncryptionApp = () => {
 
   const getPinataInfo = async () => {
     try {
-      const response = await axios.get('https://standardencyptionprotocolstest.onrender.com/getInfo');
+      const response = await axios.get('https://ess-encryption.onrender.com/getInfo');
       console.log('Pinata response:', response); // Log the response for inspection
 
       const firstRow = response.data.rows[0];
@@ -76,7 +76,7 @@ const FileEncryptionApp = () => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('https://standardencyptionprotocolstest.onrender.com/encrypt', formData, {
+      const response = await axios.post('https://ess-encryption.onrender.com/encrypt', formData, {
         params: { public_key: userPublicKey },
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -103,7 +103,7 @@ const FileEncryptionApp = () => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('https://standardencyptionprotocolstest.onrender.com/decrypt', formData, {
+      const response = await axios.post('https://ess-encryption.onrender.com/decrypt', formData, {
         params: { private_key: formattedPrivateKey },
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -127,7 +127,7 @@ const FileEncryptionApp = () => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('https://standardencyptionprotocolstest.onrender.com/upload', formData, {
+      const response = await axios.post('https://ess-encryption.onrender.com/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -177,7 +177,7 @@ const FileEncryptionApp = () => {
             <p>Encrypted File : {encryptedFile.encrypted_filename}</p>
             <p>Key: {encryptedFile.key}</p>
             <p>Download: <a
-                href={`https://standardencyptionprotocolstest.onrender.com/download/${encryptedFile.encrypted_filename}`}
+                href={`https://ess-encryption.onrender.com/download/${encryptedFile.encrypted_filename}`}
                 download>Download Encrypted File</a></p>
           </div>
       )}
@@ -194,7 +194,7 @@ const FileEncryptionApp = () => {
           <div>
             <p>Decrypted File: {decryptedFile.decrypted_filename}</p>
             <p>Download: <a
-                href={`https://standardencyptionprotocolstest.onrender.com/download/${decryptedFile.decrypted_filename}`}
+                href={`https://ess-encryption.onrender.com/download/${decryptedFile.decrypted_filename}`}
                 download>Download Decrypted File</a></p>
           </div>
       )}
