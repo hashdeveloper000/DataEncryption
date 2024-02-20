@@ -1,5 +1,6 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException,Form
 from fastapi.responses import FileResponse ,JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 import requests
@@ -7,6 +8,14 @@ import os
 from dotenv import load_dotenv
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://aes-front-end.onrender.com"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Load environment variable from .env file
 load_dotenv()
@@ -25,14 +34,10 @@ def decrypt_aes(nonce, tag, ciphertext, key):
     decrypted_data = cipher.decrypt_and_verify(ciphertext, tag)
     return decrypted_data
 
-def pin_to_IPFS(filename, jwt_token):
+def pin_to_IPFS(filepath, jwt_token):
     # Define Pinata API endpoint for pinning files to IPFS
     url = "https://api.pinata.cloud/pinning/pinFileToIPFS"
     headers = {'Authorization': f'Bearer {jwt_token}'}
-
-    # Construct the full file path using the current directory and the provided filename
-    filepath = os.path.join(os.getcwd(), filename)
-
     # Send a POST request to Pinata API to pin the file to IPFS
     with open(filepath, 'rb') as file:
         response = requests.post(url, files={'file': file}, headers=headers)
@@ -103,20 +108,20 @@ async def decrypt(key: str, file: UploadFile = File(...)):
     #return pin_to_IPFS(FILE_PATH, PINATA_JWT_TOKEN)
 #    return pin_to_IPFS(filename, PINATA_JWT_TOKEN)
 
+
 @app.post("/upload")
-async def pinata_upload(filename: str = Form(...)):
+async def pinata_upload(file: UploadFile = File(...)):
     # Get Pinata JWT token from environment variables
     PINATA_JWT_TOKEN = os.getenv('PINATA_JWT_TOKEN')
-
-    # Construct the full file path using the current directory and the provided filename
-    filepath = os.path.join(os.getcwd(), filename)
-
-    # Check if the file exists
-    if not os.path.exists(filepath):
-        raise HTTPException(status_code=404, detail="File not found")
-
+    FILE_PATH = file.filename
     # Upload the file to Pinata and return the response
-    return pin_to_IPFS(filepath, PINATA_JWT_TOKEN)
+    return pin_to_IPFS(FILE_PATH, PINATA_JWT_TOKEN)
+@app.get("/getInfo")
+async def get_pinata_data():
+    # Get Pinata JWT token from environment variables
+    PINATA_JWT_TOKEN = os.getenv('PINATA_JWT_TOKEN')
+    # Retrieve pin list from Pinata and return the response
+    return get_pin_list(PINATA_JWT_TOKEN)
 
 @app.get("/getInfo")
 async def get_pinata_data():

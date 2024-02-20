@@ -1,5 +1,6 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.responses import JSONResponse, FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from ecies.utils import generate_eth_key
 from ecies import encrypt, decrypt
 import binascii, requests, os
@@ -12,17 +13,27 @@ PUBKEY_PATH = 'public_key.pem'
 app = FastAPI()
 load_dotenv()
 
-# Initialize keys
-privKey = generate_eth_key()
-privKeyHex = privKey.to_hex()
-pubKeyHex = privKey.public_key.to_hex()
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://ess-front-end.onrender.com"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# Save keys to files
-with open(PRVKEY_PATH, 'w') as priv_key_file:
-    priv_key_file.write(privKeyHex)
+def generate_keys():
+    privKey = generate_eth_key()
+    privKeyHex = privKey.to_hex()
+    pubKeyHex = privKey.public_key.to_hex()
 
-with open(PUBKEY_PATH, 'w') as pub_key_file:
-    pub_key_file.write(pubKeyHex)
+    with open(PRVKEY_PATH, 'w') as priv_key_file:
+        priv_key_file.write(privKeyHex)
+
+    with open(PUBKEY_PATH, 'w') as pub_key_file:
+        pub_key_file.write(pubKeyHex)
+
+    return {"private_key": privKeyHex, "public_key": pubKeyHex}
 
 def encrypt_file(public_key_hex, file_content, output_file_path):
     """Encrypts file using ECIES."""
@@ -68,14 +79,15 @@ def get_pin_list(jwt_token):
 # FastAPI routes
 
 @app.get("/generate_keys")
-async def generate_keys():
-    """Generates Ethereum private and public keys."""
-    return JSONResponse(content={"private_key": privKeyHex, "public_key": pubKeyHex})
+async def generate_keys_endpoint():
+    return JSONResponse(content=generate_keys())
 
 @app.post("/encrypt")
 async def encrypt_endpoint(public_key: str, file: UploadFile = File(...)):
     """Encrypts an uploaded file using the provided public key."""
     filename = f'{file.filename}'
+    print(f"Received public key: {public_key}")
+
     encrypted_filename = f'encrypted_{file.filename}'
     full_path = os.path.abspath(encrypted_filename)
     file_content = await file.read()
@@ -94,10 +106,10 @@ async def decrypt_endpoint(private_key: str, file: UploadFile = File(...)):
         return {"decrypted_filename": decrypted_filename, "full_path": full_path}
     except Exception as e:
         raise HTTPException(status_code=500, detail="Decryption failed")
-
+"""
 #@app.post("/upload")
 #async def pinata_upload(file: UploadFile = File(...)):
-    """Uploads a file to Pinata and pins it to IPFS."""
+  #  Uploads a file to Pinata and pins it to IPFS.
 #    PINATA_JWT_TOKEN = os.getenv('JWT')
 #    FILE_PATH = file.filename
 #    return pin_to_IPFS(FILE_PATH, PINATA_JWT_TOKEN)
@@ -119,10 +131,23 @@ async def pinata_upload(filename: str = Form(...)):
 
 @app.get("/getInfo")
 async def get_pinata_data():
-    """Retrieves pin list information from Pinata."""
+    #Retrieves pin list information from Pinata.
     PINATA_JWT_TOKEN = os.getenv('PINATA_JWT_TOKEN')
     return get_pin_list(PINATA_JWT_TOKEN)
-
+"""
+@app.post("/upload")
+async def pinata_upload(file: UploadFile = File(...)):
+    # Get Pinata JWT token from environment variables
+    PINATA_JWT_TOKEN = os.getenv('PINATA_JWT_TOKEN')
+    FILE_PATH = file.filename
+    # Upload the file to Pinata and return the response
+    return pin_to_IPFS(FILE_PATH, PINATA_JWT_TOKEN)
+@app.get("/getInfo")
+async def get_pinata_data():
+    # Get Pinata JWT token from environment variables
+    PINATA_JWT_TOKEN = os.getenv('PINATA_JWT_TOKEN')
+    # Retrieve pin list from Pinata and return the response
+    return get_pin_list(PINATA_JWT_TOKEN)
 @app.get("/download/{filename}")
 async def download_file(filename: str):
     file_path = os.path.join("/opt/render/project/src", filename)
