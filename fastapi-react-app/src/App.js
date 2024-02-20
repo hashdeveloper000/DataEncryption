@@ -4,7 +4,7 @@ import './Styling.css';
 
 const FileEncryptionApp = () => {
   const [file, setFile] = useState(null);
-  const [key, setKey] = useState('');
+//  const [key, setKey] = useState('');
   const [encryptedFile, setEncryptedFile] = useState(null);
   const [decryptedFile, setDecryptedFile] = useState(null);
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -18,7 +18,7 @@ const FileEncryptionApp = () => {
 
   const generateKeys = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/generate_keys');
+      const response = await axios.get('https://standardencyptionprotocolstest.onrender.com/generate_keys');
       setKeys(response.data);
     } catch (error) {
       console.error('Error generating keys:', error);
@@ -27,11 +27,11 @@ const FileEncryptionApp = () => {
 
   const getPinataInfo = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/getInfo');
+      const response = await axios.get('https://standardencyptionprotocolstest.onrender.com/getInfo');
       console.log('Pinata response:', response); // Log the response for inspection
-  
+
       const firstRow = response.data.rows[0];
-  
+
       setPinataInfo({
         number_of_pins: response.data.count || 0,
   ipfs_hash: firstRow ? firstRow.ipfs_pin_hash : null,
@@ -64,9 +64,9 @@ const FileEncryptionApp = () => {
     setFile(event.target.files[0]);
   };
 
-  const handleKeyChange = (event) => {
-    setKey(event.target.value);
-  };
+  //const handleKeyChange = (event) => {
+  //  setKey(event.target.value);
+ // };
 
   const [userPublicKey, setUserPublicKey] = useState('');
 
@@ -74,10 +74,10 @@ const FileEncryptionApp = () => {
   const handleEncrypt = async () => {
     const formData = new FormData();
     formData.append('file', file);
-  
+
     try {
-      const response = await axios.post('http://localhost:8000/encrypt', formData, {
-        params: { public_key: userPublicKey },  
+      const response = await axios.post('https://standardencyptionprotocolstest.onrender.com/encrypt', formData, {
+        params: { public_key: userPublicKey },
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -87,7 +87,7 @@ const FileEncryptionApp = () => {
       console.error('Error encrypting file:', error);
     }
   };
-  
+
   const [userPrivateKey, setUserPrivateKey] = useState('');
 
   const handleDecrypt = async () => {
@@ -96,20 +96,20 @@ const FileEncryptionApp = () => {
       console.error('Please enter decryption key');
       return;
     }
-  
+
     const formattedPrivateKey = userPrivateKey.startsWith('0x') ? userPrivateKey : `0x${userPrivateKey}`;
-  
+
     const formData = new FormData();
     formData.append('file', file);
-  
+
     try {
-      const response = await axios.post('http://localhost:8000/decrypt', formData, {
-        params: { private_key: formattedPrivateKey },  
+      const response = await axios.post('https://standardencyptionprotocolstest.onrender.com/decrypt', formData, {
+        params: { private_key: formattedPrivateKey },
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-  
+
       setDecryptedFile(response.data);
     } catch (error) {
       console.error('Error decrypting file:', error);
@@ -127,7 +127,7 @@ const FileEncryptionApp = () => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://localhost:8000/upload', formData, {
+      const response = await axios.post('https://standardencyptionprotocolstest.onrender.com/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
