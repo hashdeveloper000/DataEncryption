@@ -173,25 +173,30 @@ const FileEncryptionApp = () => {
 
       <button onClick={handleEncrypt}>Encrypt</button>
       {encryptedFile && (
-        <div>
-          <p>Encrypted File : {encryptedFile.encrypted_filename}</p>
-          <p>Key: {encryptedFile.key}</p>
-        </div>
+          <div>
+            <p>Encrypted File : {encryptedFile.encrypted_filename}</p>
+            <p>Key: {encryptedFile.key}</p>
+            <p>Download: <a
+                href={`https://standardencyptionprotocolstest.onrender.com/download/${encryptedFile.encrypted_filename}`}
+                download>Download Encrypted File</a></p>
+          </div>
       )}
 
-        
 
       <div>
-  <label htmlFor="keyInput">Enter decryption key:</label>
-  <input type="text" id="keyInput" placeholder="Decryption Key" value={userPrivateKey} onChange={(e) => setUserPrivateKey(e.target.value)} />
+        <label htmlFor="keyInput">Enter decryption key:</label>
+        <input type="text" id="keyInput" placeholder="Decryption Key" value={userPrivateKey} onChange={(e) => setUserPrivateKey(e.target.value)} />
 </div>
 
 <button onClick={handleDecrypt}>Decrypt</button>
 
       {decryptedFile && (
-        <div>
-          <p>Decrypted File: {decryptedFile.decrypted_filename}</p>
-        </div>
+          <div>
+            <p>Decrypted File: {decryptedFile.decrypted_filename}</p>
+            <p>Download: <a
+                href={`https://standardencyptionprotocolstest.onrender.com/download/${decryptedFile.decrypted_filename}`}
+                download>Download Decrypted File</a></p>
+          </div>
       )}
 
       <div>
